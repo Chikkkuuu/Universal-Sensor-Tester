@@ -51,5 +51,4 @@ Universal_Sensor_Tester/
 ## Professional Profile
 * **Developer:** Ritul Raj Bhakat (Firmware Developer)
 * **Impact:** Optimized single-purpose diagnostic tools into a unified unit, significantly increasing troubleshooting efficiency.
-* **Contact:** [ritulraj384@gmail.com](mailto:ritulraj384@gmail.com)
-* **Links:** [LinkedIn](https://www.linkedin.com/in/ritul-raj-bhakat-521202277/) | [GitHub Portfolio](https://github.com/Chikkkuuu)
+* **Contact:** [ritulraj384@gmail.com](mailto:ritulraj384@gmail.com) | [LinkedIn](https://www.linkedin.com/in/ritul-raj-bhakat-521202277/) | [Github](https://github.com/Chikkkuuu) | [Portfolio](https://ritulrajbhakatportfolio.vercel.app/)
