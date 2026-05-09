@@ -1,54 +1,81 @@
 # Universal Sensor Tester: Multi-Protocol Diagnostic Architecture
-The **Universal Sensor Tester** is a versatile hardware diagnostic tool designed to validate and benchmark a wide array of sensors within a single unit. By implementing an auto-detection algorithm, the system identifies connected sensor types—whether Analog, Digital, or Protocol-based—and executes baseline calibration routines, reducing manual troubleshooting time by approximately **40%**.
+### High-Fidelity Signal Validation | Auto-Protocol Identification | I/O Protection
+**Focus:** Automated sensor benchmarking, hardware abstraction, and signal integrity analysis.
 
-## System Architecture
-The architecture is centered on a high-speed hardware abstraction layer that allows for seamless switching between different electrical interfaces and communication protocols.
-### 1. Unified Hardware Interface
-* **Multi-Signal Acquisition:** The tester is engineered with a universal port capable of interfacing with Analog (ADC), Digital (GPIO), and Protocol-based (I2C, SPI, UART) sensors.
-* **Auto-Detection Algorithm:** Developed a custom routine to scan the interface for active pull-ups or specific signal patterns, automatically identifying the sensor category upon connection.
-### 2. Diagnostic & Calibration Engine
-* **Protocol Benchmarking:** Independently validates data integrity for I2C and UART sensors by checking for ACK/NACK responses and parity consistency.
-* **Baseline Calibration:** Executes automated routines to determine a sensor's "zero-point" and sensitivity, ensuring high-fidelity data acquisition.
-### 3. Real-Time Visualization
-* **On-Device Feedback:** Provides instantaneous feedback on sensor health and raw output values via an integrated display or serial interface.
-* **Health Scoring:** Analyzes signal stability and noise floors to provide a pass/fail diagnostic score for the connected hardware.
+---
 
-## Technical Stack
+## Engineering Philosophy
+In rapid prototyping, manual sensor debugging often accounts for significant downtime. The **Universal Sensor Tester** was engineered to eliminate this bottleneck by implementing a **Unified Hardware Abstraction Layer (UHAL)**. This architecture allows a single port to dynamically reconfigure itself for Analog, Digital, and Serial communication (I2C/UART/SPI), reducing manual troubleshooting time by approximately **40%**.
 
-| Category | Specifications |
-| :--- | :--- |
-| **Processing Power** | ESP32 or Arduino-based architecture |
-| **Interface Support** | Analog (0-5V/0-3.3V), Digital, I2C, SPI, UART  |
-| **Algorithms** | Auto-sensing detection and baseline calibration  |
-| **Efficiency** | 40% reduction in manual troubleshooting time  |
+---
+
+## Technical Challenges & Engineering Solutions
+
+### 1. Robust Auto-Detection Algorithm
+*   **The Problem:** Manually switching firmware to test different sensor types is inefficient and prone to pin-mapping errors.
+*   **The Solution:** Developed a custom **Signal Scanning Routine** that monitors the universal port for active pull-ups (I2C), steady-state voltages (Analog), or specific start-bit patterns (UART). This allows the system to automatically identify the sensor category upon connection.
+
+### 2. Protocol Integrity Benchmarking
+*   **The Problem:** Sensors often "partially" fail, where they respond but return corrupted data or inconsistent timing.
+*   **The Solution:** Implemented a **Protocol Validator** in `Protocol_Handler.cpp`. It doesn't just read data; it benchmarks integrity by checking for ACK/NACK responses, parity consistency, and I2C clock-stretching anomalies.
+
+### 3. Baseline Calibration & Noise Analysis
+*   **The Problem:** High-sensitivity sensors often suffer from DC offset and environmental noise floor interference.
+*   **The Solution:** Integrated an **Automated Zero-Point Calibration** engine. By sampling the "Idle State" across a precise time-delta, the system calculates the noise floor and applies a software offset, ensuring high-fidelity data acquisition for subsequent tests.
+
+---
+
+## System Architecture & Logic Flow
+![System Architecture](https://github.com/Chikkkuuu/Asset/blob/main/System%20Architecture.png)
+
+The system operates as a supervisory state machine, prioritizing hardware safety and signal stability.
+
+### 1. Unified Hardware Interface (UHAL)
+*   **Multi-Signal Acquisition:** Engineered to handle high-frequency ADC sampling alongside interrupt-driven digital polling.
+*   **Health Scoring:** Analyzes signal stability and jitter to provide a quantitative pass/fail diagnostic score for the connected hardware.
+
+### 2. Real-Time Visualization
+*   **On-Device Feedback:** Coordinates with a serial interface or integrated display to provide instantaneous feedback on sensor health and raw hex/voltage values.
+
+---
 
 ## Repository Structure
-The codebase is organized into modular drivers and a central diagnostic supervisor to ensure ease of expansion for new sensor types.
 ```text
 Universal_Sensor_Tester/
 ├── Firmware/                 # Diagnostic Core
-│   ├── Tester_Main.ino       # Main lifecycle and auto-detection supervisor
-│   ├── Protocol_Handler.cpp  # Drivers for I2C, SPI, and UART benchmarking
-│   ├── Analog_Digital.cpp    # ADC and GPIO signal validation logic
-│   ├── Calibration.h         # Baseline and sensitivity adjustment routines
-│   └── Config.h              # Pin mapping and voltage threshold constants
-├── LICENSE                   # MIT Open Source License
-└── README.md                 # Project Documentation
+│   ├── Tester_Main.ino       # Main lifecycle & auto-detection supervisor
+│   ├── Protocol_Handler.cpp  # Benchmarking logic for I2C, SPI, and UART
+│   ├── Analog_Digital.cpp    # ADC/GPIO signal validation logic
+│   └── Calibration.h         # Automated zero-point adjustment routines
 ```
 
-## Deployment & Setup
-### 1. Environment Configuration
-* **Arduino IDE / PlatformIO:** Ensure the board manager is set for your specific microcontroller.
-* **Serial Monitor:** Set the baud rate to **115200** for detailed diagnostic logs and auto-detection results.
-### 2. Hardware Assembly
-* **Terminal Block:** It is recommended to use a screw-terminal or breadboard-friendly header for the "Universal Port."
-* **Level Shifting:** Ensure logic level converters are used if testing 5V sensors with a 3.3V microcontroller (like ESP32) to prevent overvoltage.
-### 3. Initial Test Run
-1. Connect a sensor to the universal port.
-2. Observe the auto-detection logs to confirm the system has identified the correct protocol.
-3. Review the calibration output to verify the sensor's functional range.
+---
 
-## Professional Profile
-* **Developer:** Ritul Raj Bhakat (Firmware Developer)
-* **Impact:** Optimized single-purpose diagnostic tools into a unified unit, significantly increasing troubleshooting efficiency.
-* **Contact:** [ritulraj384@gmail.com](mailto:ritulraj384@gmail.com) | [LinkedIn](https://www.linkedin.com/in/ritul-raj-bhakat-521202277/) | [Github](https://github.com/Chikkkuuu) | [Portfolio](https://ritulrajbhakatportfolio.vercel.app/)
+## 📈 Technical Specifications
+| Category | Specifications |
+| :--- | :--- |
+| **Logic Levels** | 3.3V / 5V (via External Level Shifting) |
+| **ADC Resolution** | 12-bit (ESP32) or 10-bit (Arduino) |
+| **Bus Protocols** | I2C (Standard/Fast), UART (up to 115200), SPI |
+| **Safety** | Voltage threshold monitoring via `Config.h` |
+
+---
+
+## 💡 Lessons Learned & Future Iterations
+This project was a deep dive into creating resilient diagnostic hardware:
+
+*   **The Pivot:** Early versions lacked adequate overvoltage protection, posing a risk to the MCU. I implemented a **Software Watchdog** that monitors ADC saturation levels in real-time. The system now alerts the user immediately if a 5V sensor is connected directly to a 3.3V GPIO, preventing hardware degradation.
+*   **Future Refinement:** I am currently developing a **Waveform Analyzer** module. This feature will visualize analog sensor "jitter" in real-time, allowing developers to diagnose EMI interference on long signal leads during the prototyping phase.
+
+---
+
+## 📬 Contact & Proof of Work
+**Ritul Raj Bhakat**  
+*Firmware Developer | Embedded Systems Architect*
+
+*   **Deep Dive:** [View My Full Portfolio](https://ritulrajbhakatportfolio.vercel.app/)
+*   **Professional:** [LinkedIn](https://linkedin.com/in/ritul-raj-bhakat)
+*   **Direct:** [Email Me](mailto:ritulraj384@gmail.com)
+
+---
+© 2026 Ritul Raj Bhakat. Optimized for rapid hardware diagnostics.
